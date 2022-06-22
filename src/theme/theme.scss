@@ -1,0 +1,126 @@
+// // 方案1
+// $color-primary-green: green; /* 更换的颜色 */
+// $color-primary-blue: blue; /* 更换的颜色 */
+
+// @mixin color_primary($color) {
+//     /*通过该函数设置字体颜色，后期方便统一管理；*/
+//     color: $color;
+
+//     [data-theme='green'] & {
+//         color: $color-primary-green;
+//     }
+//     [data-theme='blue'] & {
+//         color: $color-primary-blue;
+//     }
+// }
+
+// 方案二
+// .theme {
+//     --theme-color: #1db0fc;
+//     --price-color: #fd502f;
+//     --btn-color: #22cafd;
+//     --subtheme-color: #40d1f4;
+// }
+
+// [data-theme='green'] {
+//     --theme-color: #42ca4d;
+//     --price-color: #ff7600;
+//     --btn-color: #fe960f;
+//     --subtheme-color: #70e038;
+// }
+// .theme [data-theme='red'] {
+//     --theme-color: #e93323;
+//     --price-color: #e93323;
+//     --btn-color: #fe960f;
+//     --subtheme-color: #ff6151;
+// }
+// 方案三
+// 通过动态style 方式
+
+$themes: (
+    green: (
+        //字体
+        font_color1: #07bc78,
+        //背景
+        background_color1: #07bc78,
+        background_color2: #18b277,
+        background_color3: #0aa170,
+        // 主体颜色
+        main-background_color1: #eff4ee,
+        // 按钮颜色
+        btn_color: #07bc78,
+        //边框
+        border_color1: #07bc78,
+        // 阴影
+        box_shadow_color: rgba(56, 210, 78, 0.6),
+    ),
+    pink: (
+        //字体
+        //字体
+        font_color1: #ff4b50,
+        //背景
+        background_color1: #ff4b50,
+        background_color2: #ff4b50,
+        background_color3: #ff4b50,
+        // 主体颜色
+        main-background_color1: #f4eef0,
+        // 按钮颜色
+        btn_color: #ff4b50,
+        //边框
+        border_color1: #ff4b50,
+        // 阴影
+        box_shadow_color: rgba(255, 75, 80, 0.6),
+    ),
+);
+
+//遍历主题map
+@mixin themeify {
+    @each $theme-name, $theme-map in $themes {
+        //global 把局部变量强升为全局变量
+        $theme-map: $theme-map !global;
+
+        //判断html的data-theme的属性值  #{}是sass的插值表达式
+        //& sass嵌套里的父容器标识   @content是混合器插槽，像vue的slot
+        [data-theme='$theme-name'] & {
+            @content;
+        }
+    }
+}
+
+//声明一个根据Key获取颜色的function
+@function themed($key) {
+    @return map-get($theme-map, $key);
+}
+
+//获取背景颜色
+@mixin background_color($color) {
+    @include themeify {
+        background-color: themed($color) !important;
+    }
+}
+
+//获取字体颜色
+@mixin font_color($color) {
+    @include themeify {
+        color: themed($color) !important;
+    }
+}
+
+//获取边框颜色
+@mixin border_color($color) {
+    @include themeify {
+        border-color: themed($color) !important;
+    }
+}
+//获取边框颜色
+@mixin border_line_color($color, $num: 1px) {
+    @include themeify {
+        border: $num solid themed($color) !important;
+    }
+}
+// 阴影
+@mixin box-shadowr($shadows, $color) {
+    @include themeify {
+        box-shadow: $shadows themed($color) !important;
+    }
+}
